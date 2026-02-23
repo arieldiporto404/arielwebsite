@@ -42,6 +42,7 @@ export const WritingList = ({ items }) => {
               title,
               slug,
               date,
+              tags,
               sys: { firstPublishedAt }
             } = item
             const dateObj = new Date(date || firstPublishedAt)
@@ -74,7 +75,18 @@ export const WritingList = ({ items }) => {
                         {dateWithMonthAndYear}
                       </time>
                     </span>
-                    <span className="col-span-2 line-clamp-4 md:col-span-6">{title}</span>
+                    <span className="col-span-2 flex flex-col gap-1 md:col-span-6">
+                      <span className="line-clamp-4">{title}</span>
+                      {tags?.length > 0 && (
+                        <span className="flex flex-wrap gap-1">
+                          {tags.map((tag) => (
+                            <span key={tag} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 group-hover/list-item:bg-gray-200">
+                              {tag}
+                            </span>
+                          ))}
+                        </span>
+                      )}
+                    </span>
                     {formattedViewCount && (
                       <span className="col-span-1">
                         <m.span

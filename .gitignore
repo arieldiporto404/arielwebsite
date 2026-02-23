@@ -1,5 +1,7 @@
 .vscode
 .env
+.env.local
+.env*.local
 
 # next.js
 /.next/

@@ -40,6 +40,7 @@ export const getAllPosts = cache(async (preview = isDevelopment) => {
             title
             slug
             date
+            tags
             sys {
               firstPublishedAt
               publishedAt
@@ -66,10 +67,7 @@ export const getPost = cache(async (slug, preview = isDevelopment) => {
             title
             slug
             date
-            seo {
-              title
-              description
-            }
+            tags
             content {
               json
               links {
@@ -86,43 +84,6 @@ export const getPost = cache(async (slug, preview = isDevelopment) => {
                     width
                     height
                     description
-                    contentfulMetadata {
-                      tags {
-                        name
-                      }
-                    }
-                  }
-                }
-                entries {
-                  inline {
-                    sys {
-                      id
-                    }
-                    __typename
-                    ... on ContentEmbed {
-                      title
-                      embedUrl
-                      type
-                    }
-                    ... on CodeBlock {
-                      title
-                      code
-                    }
-                    ... on Tweet {
-                      id
-                    }
-                    ... on Carousel {
-                      imagesCollection {
-                        items {
-                          title
-                          description
-                          url(transform: {
-                            format: AVIF,
-                            quality: 50
-                          })
-                        }
-                      }
-                    }
                   }
                 }
               }
@@ -150,14 +111,8 @@ export const getWritingSeo = cache(async (slug, preview = isDevelopment) => {
       `query {
         postCollection(where: { slug: "${slug}" }, preview: ${preview}, limit: 1) {
           items {
+            title
             date
-            seo {
-              title
-              description
-              ogImageTitle
-              ogImageSubtitle
-              keywords
-            }
             sys {
               firstPublishedAt
               publishedAt

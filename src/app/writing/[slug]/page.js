@@ -33,7 +33,7 @@ export default async function WritingSlug(props) {
   const {
     title,
     date,
-    seo: { title: seoTitle, description: seoDescription },
+    tags,
     content,
     sys: { firstPublishedAt, publishedAt: updatedAt }
   } = data
@@ -46,15 +46,14 @@ export default async function WritingSlug(props) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
-    headline: seoTitle,
-    description: seoDescription,
+    headline: title,
     datePublished,
     dateModified,
     author: {
       '@type': 'Person',
-      name: 'Onur Şuyalçınkaya'
+      name: 'Ariel Di Porto'
     },
-    url: `https://onur.dev/writing/${slug}`
+    url: `https://arieldiporto.com/writing/${slug}`
   }
 
   return (
@@ -74,6 +73,15 @@ export default async function WritingSlug(props) {
               }
               className="mb-6 flex flex-col gap-3"
             />
+            {tags?.length > 0 && (
+              <div className="mb-6 flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <span key={tag} className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-500">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
             <RichText content={content} />
           </article>
         </div>
@@ -92,8 +100,8 @@ export async function generateMetadata(props) {
   if (!seoData) return null
 
   const {
+    title,
     date,
-    seo: { title, description, keywords },
     sys: { firstPublishedAt, publishedAt: updatedAt }
   } = seoData
 
@@ -104,18 +112,14 @@ export async function generateMetadata(props) {
 
   return {
     title,
-    description,
-    keywords,
     openGraph: {
       title,
-      description,
       type: 'article',
       publishedTime,
       ...(updatedAt && {
         modifiedTime
       }),
-      url: siteUrl,
-      images: siteUrl + '/og.png'
+      url: siteUrl
     },
     alternates: {
       canonical: siteUrl
