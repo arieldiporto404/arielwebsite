@@ -1,16 +1,22 @@
 import 'server-only'
 
+const headers = {
+  'Content-Type': 'application/json',
+  Authorization: `Bearer ${process.env.RAINDROP_ACCESS_TOKEN}`
+}
+
 const options = {
-  cache: 'force-cache',
   method: 'GET',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${process.env.RAINDROP_ACCESS_TOKEN}`
-  },
+  headers,
   next: {
     revalidate: 60 * 60 * 24 * 2 // 2 days
-  },
-  signal: AbortSignal.timeout(10000) // 10 second timeout to prevent hanging requests
+  }
+}
+
+const noStoreOptions = {
+  method: 'GET',
+  headers,
+  cache: 'no-store'
 }
 
 const RAINDROP_API_URL = 'https://api.raindrop.io/rest/v1'
@@ -28,7 +34,7 @@ export const getBookmarkItems = async (id, pageIndex = 0) => {
           page: pageIndex,
           perpage: 50
         }),
-      options
+      noStoreOptions
     )
 
     if (!response.ok) {
@@ -44,17 +50,56 @@ export const getBookmarkItems = async (id, pageIndex = 0) => {
 
 export const getBookmarks = async () => {
   try {
-    const response = await fetch(`${RAINDROP_API_URL}/collections`, options)
+    const [rootResponse, childrenResponse] = await Promise.all([
+      fetch(`${RAINDROP_API_URL}/collections`, noStoreOptions),
+      fetch(`${RAINDROP_API_URL}/collections/childrens`, noStoreOptions)
+    ])
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
+    if (!rootResponse.ok) throw new Error(`HTTP error! status: ${rootResponse.status}`)
+    if (!childrenResponse.ok) throw new Error(`HTTP error! status: ${childrenResponse.status}`)
 
-    const bookmarks = await response.json()
-    return bookmarks.items ?? []
+    const [rootData, childrenData] = await Promise.all([rootResponse.json(), childrenResponse.json()])
+
+    const all = [...(rootData.items ?? []), ...(childrenData.items ?? [])]
+    const unique = Array.from(new Map(all.map((c) => [c._id, c])).values())
+    return unique.filter((c) => c.count > 0)
   } catch (error) {
     console.error(`Failed to fetch bookmarks: ${error.message}`)
     return null
+  }
+}
+
+export const getBookmarksTree = async () => {
+  try {
+    const [rootResponse, childrenResponse] = await Promise.all([
+      fetch(`${RAINDROP_API_URL}/collections`, noStoreOptions),
+      fetch(`${RAINDROP_API_URL}/collections/childrens`, noStoreOptions)
+    ])
+
+    if (!rootResponse.ok) throw new Error(`HTTP error! status: ${rootResponse.status}`)
+    if (!childrenResponse.ok) throw new Error(`HTTP error! status: ${childrenResponse.status}`)
+
+    const [rootData, childrenData] = await Promise.all([rootResponse.json(), childrenResponse.json()])
+
+    const childrenByParent = {}
+    ;(childrenData.items ?? []).forEach((child) => {
+      const parentId = child.parent?.$id
+      if (parentId) {
+        if (!childrenByParent[parentId]) childrenByParent[parentId] = []
+        childrenByParent[parentId].push(child)
+      }
+    })
+
+    return (rootData.items ?? [])
+      .filter((root) => root.count > 0)
+      .map((root) => ({
+        ...root,
+        children: (childrenByParent[root._id] ?? []).filter((c) => c.count > 0)
+      }))
+      .sort((a, b) => a.title.localeCompare(b.title))
+  } catch (error) {
+    console.error('Failed to fetch bookmarks tree:', error.message)
+    return []
   }
 }
 

@@ -75,7 +75,7 @@ export const SideMenu = ({ children, title, bookmarks = [], isInner }) => {
             </div>
           </div>
         )}
-        <div className="bg-zinc-50 p-3">{children}</div>
+        <div className="flex flex-1 flex-col bg-zinc-50 p-3">{children}</div>
       </ScrollArea>
     ),
     [isInner, title, isWritingPath, isBookmarksPath, bookmarks, currentBookmark, children]

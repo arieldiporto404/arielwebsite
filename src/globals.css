@@ -185,7 +185,7 @@
 }
 
 @utility content {
-  @apply mx-auto w-full lg:mb-0 lg:max-w-3xl;
+  @apply mx-auto w-full lg:mb-0 lg:max-w-4xl;
 }
 
 @utility link {

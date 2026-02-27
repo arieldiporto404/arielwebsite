@@ -4,8 +4,8 @@ import { NavigationLink } from '@/components/navigation-link'
 import { LINKS, PROFILES } from '@/lib/constants'
 
 export const MenuContent = () => (
-  <div className="flex w-full flex-col text-sm">
-    <div className="flex flex-col gap-4">
+  <div className="flex flex-1 flex-col text-sm">
+    <div className="flex flex-col gap-4 pb-4">
       <Link href="/" className="link-card inline-flex items-center gap-2 p-2">
         <img
           src="/assets/image.png"
@@ -34,13 +34,22 @@ export const MenuContent = () => (
         ))}
       </div>
     </div>
-    <hr />
-    <div className="flex flex-col gap-2 text-sm">
+    <div className="flex-1" />
+    <hr className="mb-4" />
+    <div className="flex flex-col gap-2 pb-4 text-sm">
       <span className="px-2 text-xs leading-relaxed font-medium text-gray-600">Online</span>
       <div className="flex flex-col gap-1">
-        {Object.values(PROFILES).map((profile) => (
-          <NavigationLink key={profile.url} href={profile.url} label={profile.title} icon={profile.icon} />
-        ))}
+        {Object.values(PROFILES)
+          .filter((profile) => profile.enabled !== false)
+          .map((profile, index) => (
+            <div
+              key={profile.url}
+              className="animate-in slide-in-from-bottom-2 fade-in duration-300"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <NavigationLink href={profile.url} label={profile.title} icon={profile.icon} />
+            </div>
+          ))}
       </div>
     </div>
   </div>

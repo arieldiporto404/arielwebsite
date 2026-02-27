@@ -27,38 +27,42 @@ export function ServicesSection({ services, calLink }) {
   )
 
   return (
-    <div className="mt-10">
-      <h2 className="mb-1 font-semibold tracking-tight">Cosa posso fare per te</h2>
-      <p className="mb-6 text-sm text-gray-500">
-        Supporto finanziario per imprenditori e PMI, sia nella gestione ordinaria che in operazioni straordinarie.
-      </p>
-
-      <div className="flex flex-col gap-6">
-        <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">
-            {CATEGORY_LABEL.ordinario}
+    <div className="mt-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="md:col-span-2 rounded-xl border border-gray-200 bg-gray-50 p-5">
+          <h2 className="mb-1 font-semibold tracking-tight">Cosa posso fare per te</h2>
+          <p className="mb-6 text-sm text-gray-500">
+            Supporto finanziario per imprenditori e PMI, sia nella gestione ordinaria che in operazioni straordinarie.
           </p>
-          <div className="flex flex-wrap gap-2">{ordinary.map(renderPill)}</div>
+
+          <div className="flex flex-col gap-6">
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">
+                {CATEGORY_LABEL.ordinario}
+              </p>
+              <div className="flex flex-wrap gap-2">{ordinary.map(renderPill)}</div>
+            </div>
+
+            <div>
+              <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">
+                {CATEGORY_LABEL.straordinario}
+              </p>
+              <div className="flex flex-wrap gap-2">{extraordinary.map(renderPill)}</div>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">
-            {CATEGORY_LABEL.straordinario}
-          </p>
-          <div className="flex flex-wrap gap-2">{extraordinary.map(renderPill)}</div>
+        <div className="flex flex-col justify-between rounded-xl border border-gray-200 bg-gray-50 p-5">
+          <div>
+            <p className="font-semibold">Prenota una call</p>
+            <p className="mt-1 text-sm text-gray-500">Parliamo di come posso supportare la tua azienda.</p>
+          </div>
+          <Button asChild className="mt-6 w-full">
+            <a href={calLink} target="_blank" rel="noopener noreferrer">
+              Prenota ora →
+            </a>
+          </Button>
         </div>
-      </div>
-
-      <div className="mt-8 flex flex-col gap-2 rounded-xl border border-gray-200 bg-gray-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="font-semibold">Prenota una call</p>
-          <p className="text-sm text-gray-500">Parliamo di come posso supportare la tua azienda.</p>
-        </div>
-        <Button asChild className="shrink-0">
-          <a href={calLink} target="_blank" rel="noopener noreferrer">
-            Prenota ora →
-          </a>
-        </Button>
       </div>
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>

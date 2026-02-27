@@ -16,6 +16,7 @@ export const PROFILES = {
     title: 'X (Twitter)',
     username: 'onurschu',
     url: 'https://twitter.com/intent/user?screen_name=onurschu',
+    enabled: true,
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -38,42 +39,51 @@ export const PROFILES = {
   github: {
     title: 'GitHub',
     url: 'https://github.com/suyalcinkaya',
+    enabled: true,
     icon: <GithubIcon size={16} />
   },
   linkedin: {
     title: 'LinkedIn',
     url: 'https://www.linkedin.com/in/suyalcinkaya',
+    enabled: true,
     icon: <LinkedinIcon size={16} />
   },
   medium: {
     title: 'Medium',
-    url: 'https://suyalcinkaya.medium.com'
+    url: 'https://suyalcinkaya.medium.com',
+    enabled: false
   },
   instagram: {
     title: 'Instagram',
     url: 'https://www.instagram.com/jgrmn',
+    enabled: true,
     icon: <InstagramIcon size={16} />
   },
   soundcloud: {
     title: 'Soundcloud',
-    url: 'https://soundcloud.com/jagerman'
+    url: 'https://soundcloud.com/jagerman',
+    enabled: true
   },
   youtube: {
     title: 'YouTube',
     url: 'https://www.youtube.com/c/jagermanmusic',
+    enabled: true,
     icon: <YoutubeIcon size={16} />
   },
   bluesky: {
     title: 'Bluesky',
-    url: 'https://staging.bsky.app/profile/onur.dev'
+    url: 'https://staging.bsky.app/profile/onur.dev',
+    enabled: true
   },
   readcv: {
     title: 'Read.cv',
-    url: 'https://read.cv/onur'
+    url: 'https://read.cv/onur',
+    enabled: true
   },
   pinterest: {
     title: 'Pinterest',
-    url: 'https://nl.pinterest.com/onurschu'
+    url: 'https://nl.pinterest.com/onurschu',
+    enabled: true
   }
 }
 

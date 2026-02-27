@@ -14,8 +14,8 @@ export const BookmarkCard = ({ bookmark, order }) => {
   return (
     <a
       key={bookmark._id}
-      className="thumbnail-shadow flex aspect-auto min-w-0 cursor-pointer flex-col gap-4 overflow-hidden rounded-xl bg-white p-4 transition-colors duration-300 hover:bg-gray-100"
-      href={`${bookmark.link}?ref=onur.dev`}
+      className="thumbnail-shadow flex aspect-auto min-w-0 flex-1 cursor-pointer flex-col gap-4 overflow-hidden rounded-xl bg-white p-4 transition-colors duration-300 hover:bg-gray-100"
+      href={`${bookmark.link}?ref=arieldiporto.com`}
       target="_blank"
       rel="noopener noreferrer"
       data-bookmark-order={order}
@@ -42,7 +42,9 @@ export const BookmarkCard = ({ bookmark, order }) => {
           <Link2Icon size={16} />
           {bookmark.domain}
         </span>
-        <span className="line-clamp-6 text-sm">{bookmark.excerpt || bookmark.note}</span>
+        {bookmark.excerpt && (
+          <span className="line-clamp-4 text-sm text-gray-400">{bookmark.excerpt}</span>
+        )}
       </div>
     </a>
   )
