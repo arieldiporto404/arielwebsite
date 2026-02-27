@@ -6,19 +6,21 @@ import { PageTitle } from '@/components/page-title'
 import { ScreenLoadingSpinner } from '@/components/screen-loading-spinner'
 import { ScrollArea } from '@/components/scroll-area'
 import { Button } from '@/components/ui/button'
+import { ServicesSection } from '@/components/services-section'
 import { WritingList } from '@/components/writing-list'
 import { getAllPosts } from '@/lib/contentful'
+import { getAllServices } from '@/lib/supabase/services'
 import { getItemsByYear, getSortedPosts } from '@/lib/utils'
 
 async function fetchData() {
-  const allPosts = await getAllPosts()
+  const [allPosts, services] = await Promise.all([getAllPosts(), getAllServices()])
   const sortedPosts = getSortedPosts(allPosts)
   const items = getItemsByYear(sortedPosts)
-  return { items }
+  return { items, services }
 }
 
 export default async function Home() {
-  const { items } = await fetchData()
+  const { items, services } = await fetchData()
 
   return (
     <ScrollArea useScrollAreaId>
@@ -48,17 +50,7 @@ export default async function Home() {
               nopin="nopin"
             />
           </div>
-          <div className="mt-8 mb-4 rounded-xl border border-gray-200 bg-gray-50 p-6">
-            <h2 className="mb-1">Prenota una call</h2>
-            <p className="mb-4 text-sm text-gray-600">
-              Vuoi parlare con me? Prenota una call direttamente nel mio calendario.
-            </p>
-            <Button asChild>
-              <a href="https://cal.com/it/" target="_blank" rel="noopener noreferrer">
-                Prenota ora →
-              </a>
-            </Button>
-          </div>
+          <ServicesSection services={services} calLink="https://cal.com/it/" />
           <Button asChild variant="link" className="inline px-0">
             <Link href="/writing">
               <h2 className="mt-8 mb-4">Writing</h2>
