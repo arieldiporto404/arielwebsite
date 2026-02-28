@@ -46,24 +46,24 @@ const fmtIrr = (v) => (v == null || !isFinite(v) ? '—' : (v * 100).toFixed(1) 
 // ─── Tailwind class tokens ────────────────────────────────────────────────────
 
 // Table header cells
-const HDR = 'border-b border-r border-gray-200 bg-gray-50 px-3 py-2 text-center text-xs font-semibold uppercase tracking-widest text-blue-600 whitespace-nowrap'
-const HDR_LEFT = 'sticky left-0 z-10 border-b border-r border-gray-200 bg-gray-50 px-3 py-2 text-left text-xs font-semibold text-gray-400 whitespace-nowrap'
+const HDR = 'h-7 border-b border-r border-gray-200 bg-gray-50 px-2 align-middle text-center text-[10px] font-semibold uppercase tracking-widest text-blue-600 whitespace-nowrap'
+const HDR_LEFT = 'h-7 sticky left-0 z-10 border-b border-r border-gray-200 bg-gray-50 px-2 align-middle text-left text-[10px] font-semibold text-gray-400 whitespace-nowrap'
 
 // Regular data cells
-const CELL = 'border-b border-r border-gray-200 px-3 py-1.5 text-right font-mono text-xs text-gray-700 whitespace-nowrap min-w-[80px]'
-const CELL_LEFT = 'sticky left-0 z-10 border-b border-r border-gray-200 bg-white px-3 py-1.5 text-left text-xs font-medium text-gray-900 whitespace-nowrap min-w-[140px]'
-const CELL_LEFT_MUTED = 'sticky left-0 z-10 border-b border-r border-gray-200 bg-white px-3 py-1.5 text-left text-xs font-normal text-gray-500 whitespace-nowrap min-w-[140px]'
-const CELL_LEFT_DIM = 'sticky left-0 z-10 border-b border-r border-gray-200 bg-white px-3 py-1.5 text-left text-xs font-normal italic text-gray-400 whitespace-nowrap min-w-[140px]'
-const CELL_LEFT_TOTAL = 'sticky left-0 z-10 border-b border-r border-gray-200 bg-gray-50 px-3 py-1.5 text-left text-xs font-semibold text-gray-900 whitespace-nowrap min-w-[140px]'
-const CELL_INPUT = 'border-b border-r border-gray-200 bg-gray-50 px-3 py-1.5 min-w-[80px]'
-const CELL_COMPUTED = 'border-b border-r border-gray-200 px-3 py-1.5 text-right font-mono text-xs italic text-gray-400 whitespace-nowrap min-w-[80px]'
+const CELL = 'h-7 border-b border-r border-gray-200 px-2 align-middle text-right font-mono text-xs text-gray-700 whitespace-nowrap min-w-[60px]'
+const CELL_LEFT = 'h-7 sticky left-0 z-10 border-b border-r border-gray-200 bg-white px-2 align-middle text-left text-xs font-medium text-gray-900 whitespace-nowrap min-w-[110px]'
+const CELL_LEFT_MUTED = 'h-7 sticky left-0 z-10 border-b border-r border-gray-200 bg-white px-2 align-middle text-left text-xs font-normal text-gray-500 whitespace-nowrap min-w-[110px]'
+const CELL_LEFT_DIM = 'h-7 sticky left-0 z-10 border-b border-r border-gray-200 bg-white px-2 align-middle text-left text-xs font-normal italic text-gray-400 whitespace-nowrap min-w-[110px]'
+const CELL_LEFT_TOTAL = 'h-7 sticky left-0 z-10 border-b border-r border-gray-200 bg-gray-50 px-2 align-middle text-left text-xs font-semibold text-gray-900 whitespace-nowrap min-w-[110px]'
+const CELL_INPUT = 'h-7 border-b border-r border-gray-200 bg-gray-50 px-2 align-middle min-w-[60px]'
+const CELL_COMPUTED = 'h-7 border-b border-r border-gray-200 px-2 align-middle text-right font-mono text-xs italic text-gray-400 whitespace-nowrap min-w-[60px]'
 
 // Inputs
 const INPUT = 'w-full border-none bg-transparent p-0 font-mono text-xs text-right text-gray-900 outline-none'
 const INPUT_LEFT = 'w-full border-none bg-transparent p-0 text-xs font-medium text-gray-900 outline-none'
 
 // Buttons
-const BTN = 'cursor-pointer rounded-full border border-dashed border-gray-300 bg-transparent px-3 py-1 text-xs text-gray-500 transition-colors hover:border-gray-500 hover:text-gray-800'
+const BTN = 'cursor-pointer rounded-full border border-dashed border-gray-300 bg-transparent px-2.5 py-0.5 text-xs text-gray-500 transition-colors hover:border-gray-500 hover:text-gray-800'
 
 // Type → dot color
 const TYPE_COLOR = {
@@ -123,13 +123,13 @@ function ExitAmountInput({ value, onChange }) {
           value={value ?? ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder="20000000"
-          className="w-36 border-none bg-transparent p-0 font-mono text-xs text-gray-900 outline-none"
+          className="w-28 border-none bg-transparent p-0 font-mono text-xs text-gray-900 outline-none"
           onBlur={() => setFocused(false)}
           autoFocus
         />
       ) : (
         <div
-          className={`w-36 cursor-text font-mono text-xs ${hasValue ? 'text-gray-900' : 'text-gray-400'}`}
+          className={`w-28 cursor-text font-mono text-xs ${hasValue ? 'text-gray-900' : 'text-gray-400'}`}
           onClick={() => setFocused(true)}
         >
           {hasValue ? fmtEur(numVal) : <span className="opacity-40">€ 0</span>}
@@ -298,11 +298,11 @@ export function EquityStory() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
 
       {/* ── CAP TABLE ─────────────────────────────────────────────────────── */}
-      <div className="overflow-x-auto rounded-xl border border-gray-200">
-        <table className="w-full border-collapse">
+      <div className="overflow-x-auto rounded-xl border border-gray-200 w-fit max-w-full">
+        <table className="border-collapse">
           <thead>
             <tr>
               <th className={HDR_LEFT} />
@@ -443,143 +443,146 @@ export function EquityStory() {
               })}
             </tr>
 
-            {/* ── ROUND DETAILS ─────────────────────────────────────────────── */}
-            <tr><td colSpan={numCols} className="h-4 bg-white p-0" /></tr>
-            <tr>
-              <th className={HDR_LEFT} />
-              {model.snapshots.map((snap, i) => (
-                <th key={i} className={HDR}>{i === 0 ? '' : rounds[i - 1]?.name || snap.label}</th>
-              ))}
-            </tr>
+            {/* ── ROUND DETAILS — solo se ci sono round ──────────────────── */}
+            {rounds.length > 0 && (
+              <>
+                <tr><td colSpan={numCols} className="h-2 bg-white p-0" /></tr>
+                <tr>
+                  <th className={HDR_LEFT} />
+                  {model.snapshots.map((snap, i) => (
+                    <th key={i} className={HDR}>{i === 0 ? '' : rounds[i - 1]?.name || snap.label}</th>
+                  ))}
+                </tr>
+                <tr>
+                  <td className={CELL_LEFT_MUTED}>Premoney</td>
+                  <td className={CELL} />
+                  {rounds.map((r) => (
+                    <EurInput key={r.id} value={r.preMoney} onChange={(v) => ur(r.id, 'preMoney', v)} placeholder="€ 0" />
+                  ))}
+                </tr>
+                <tr>
+                  <td className={CELL_LEFT_MUTED}>Round Size</td>
+                  <td className={CELL} />
+                  {rounds.map((r) => (
+                    <EurInput key={r.id} value={r.raised} onChange={(v) => ur(r.id, 'raised', v)} placeholder="€ 0" green />
+                  ))}
+                </tr>
+                <tr>
+                  <td className={CELL_LEFT_MUTED}>Postmoney</td>
+                  <td className={CELL} />
+                  {rounds.map((r, i) => (
+                    <td key={r.id} className={CELL_COMPUTED}>{model.roundMeta[i]?.postMoney ? fmtEur(model.roundMeta[i].postMoney) : ''}</td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className={CELL_LEFT_MUTED}>Diluizione</td>
+                  <td className={CELL} />
+                  {rounds.map((r, i) => (
+                    <td key={r.id} className={CELL_COMPUTED}>{model.roundMeta[i]?.dilution != null ? fmtPct(model.roundMeta[i].dilution) : ''}</td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className={CELL_LEFT_MUTED}>ESOP</td>
+                  <td className={CELL} />
+                  {rounds.map((r) => (
+                    <td key={r.id} className={CELL_INPUT}>
+                      <input
+                        className={INPUT}
+                        type="number"
+                        value={r.esopPct ?? ''}
+                        onChange={(e) => ur(r.id, 'esopPct', e.target.value)}
+                        placeholder="0%"
+                      />
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className={CELL_LEFT_MUTED}>Diluizione Totale</td>
+                  <td className={CELL} />
+                  {rounds.map((r, i) => (
+                    <td key={r.id} className={CELL_COMPUTED}>{model.roundMeta[i]?.totalDilution != null ? fmtPct(model.roundMeta[i].totalDilution) : ''}</td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className={CELL_LEFT_MUTED}>Liquidation Pref.</td>
+                  <td className={CELL} />
+                  {rounds.map((r) => (
+                    <td key={r.id} className={CELL_INPUT}>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <input
+                          type="checkbox"
+                          checked={r.hasLiqPref || false}
+                          onChange={(e) => ur(r.id, 'hasLiqPref', e.target.checked)}
+                          className="cursor-pointer accent-blue-600"
+                        />
+                        {r.hasLiqPref && (
+                          <select
+                            className="cursor-pointer border-none bg-transparent p-0 font-mono text-[11px] text-blue-600 outline-none"
+                            value={r.liqPrefType || 'participating'}
+                            onChange={(e) => ur(r.id, 'liqPrefType', e.target.value)}
+                          >
+                            <option value="participating">1x Part.</option>
+                            <option value="non-participating">1x Non Part.</option>
+                          </select>
+                        )}
+                      </div>
+                    </td>
+                  ))}
+                </tr>
+                <tr>
+                  <td className={CELL_LEFT_MUTED}>Data</td>
+                  <td className={CELL} />
+                  {rounds.map((r) => (
+                    <td key={r.id} className={CELL_INPUT}>
+                      <input
+                        className={`${INPUT} text-blue-600`}
+                        type="date"
+                        value={r.date ?? ''}
+                        onChange={(e) => ur(r.id, 'date', e.target.value)}
+                      />
+                    </td>
+                  ))}
+                </tr>
 
-            <tr>
-              <td className={CELL_LEFT_MUTED}>Premoney</td>
-              <td className={CELL} />
-              {rounds.map((r) => (
-                <EurInput key={r.id} value={r.preMoney} onChange={(v) => ur(r.id, 'preMoney', v)} placeholder="€ 0" />
-              ))}
-            </tr>
-            <tr>
-              <td className={CELL_LEFT_MUTED}>Round Size</td>
-              <td className={CELL} />
-              {rounds.map((r) => (
-                <EurInput key={r.id} value={r.raised} onChange={(v) => ur(r.id, 'raised', v)} placeholder="€ 0" green />
-              ))}
-            </tr>
-            <tr>
-              <td className={CELL_LEFT_MUTED}>Postmoney</td>
-              <td className={CELL} />
-              {rounds.map((r, i) => (
-                <td key={r.id} className={CELL_COMPUTED}>{model.roundMeta[i]?.postMoney ? fmtEur(model.roundMeta[i].postMoney) : ''}</td>
-              ))}
-            </tr>
-            <tr>
-              <td className={CELL_LEFT_MUTED}>Diluizione</td>
-              <td className={CELL} />
-              {rounds.map((r, i) => (
-                <td key={r.id} className={CELL_COMPUTED}>{model.roundMeta[i]?.dilution != null ? fmtPct(model.roundMeta[i].dilution) : ''}</td>
-              ))}
-            </tr>
-            <tr>
-              <td className={CELL_LEFT_MUTED}>ESOP</td>
-              <td className={CELL} />
-              {rounds.map((r) => (
-                <td key={r.id} className={CELL_INPUT}>
-                  <input
-                    className={INPUT}
-                    type="number"
-                    value={r.esopPct ?? ''}
-                    onChange={(e) => ur(r.id, 'esopPct', e.target.value)}
-                    placeholder="0%"
-                  />
-                </td>
-              ))}
-            </tr>
-            <tr>
-              <td className={CELL_LEFT_MUTED}>Diluizione Totale</td>
-              <td className={CELL} />
-              {rounds.map((r, i) => (
-                <td key={r.id} className={CELL_COMPUTED}>{model.roundMeta[i]?.totalDilution != null ? fmtPct(model.roundMeta[i].totalDilution) : ''}</td>
-              ))}
-            </tr>
-            <tr>
-              <td className={CELL_LEFT_MUTED}>Liquidation Pref.</td>
-              <td className={CELL} />
-              {rounds.map((r) => (
-                <td key={r.id} className={CELL_INPUT}>
-                  <div className="flex items-center justify-end gap-1.5">
-                    <input
-                      type="checkbox"
-                      checked={r.hasLiqPref || false}
-                      onChange={(e) => ur(r.id, 'hasLiqPref', e.target.checked)}
-                      className="cursor-pointer accent-blue-600"
-                    />
-                    {r.hasLiqPref && (
-                      <select
-                        className="cursor-pointer border-none bg-transparent p-0 font-mono text-[11px] text-blue-600 outline-none"
-                        value={r.liqPrefType || 'participating'}
-                        onChange={(e) => ur(r.id, 'liqPrefType', e.target.value)}
-                      >
-                        <option value="participating">1x Part.</option>
-                        <option value="non-participating">1x Non Part.</option>
-                      </select>
-                    )}
-                  </div>
-                </td>
-              ))}
-            </tr>
-            <tr>
-              <td className={CELL_LEFT_MUTED}>Data</td>
-              <td className={CELL} />
-              {rounds.map((r) => (
-                <td key={r.id} className={CELL_INPUT}>
-                  <input
-                    className={`${INPUT} text-blue-600`}
-                    type="date"
-                    value={r.date ?? ''}
-                    onChange={(e) => ur(r.id, 'date', e.target.value)}
-                  />
-                </td>
-              ))}
-            </tr>
-
-            {/* ── FOUNDER INVESTMENT ────────────────────────────────────────── */}
-            <tr><td colSpan={numCols} className="h-4 bg-white p-0" /></tr>
-            <tr>
-              <th className={HDR_LEFT}>Investimento Fondatori</th>
-              {founders.map((f) => <th key={f.id} className={HDR}>{f.name}</th>)}
-              {model.snapshots.length > founders.length &&
-                Array.from({ length: model.snapshots.length - founders.length }).map((_, i) => (
-                  <th key={`ef-${i}`} className={HDR} />
-                ))}
-            </tr>
-            <tr>
-              <td className={CELL_LEFT_MUTED}>Importo (€)</td>
-              {founders.map((f) => (
-                <EurInput key={f.id} value={f.invested} onChange={(v) => uf(f.id, 'invested', v)} placeholder="€ 0" />
-              ))}
-              {model.snapshots.length > founders.length &&
-                Array.from({ length: model.snapshots.length - founders.length }).map((_, i) => (
-                  <td key={`ef-${i}`} className={CELL} />
-                ))}
-            </tr>
-            <tr>
-              <td className={CELL_LEFT_MUTED}>Data</td>
-              {founders.map((f) => (
-                <td key={f.id} className={CELL_INPUT}>
-                  <input
-                    className={`${INPUT} text-blue-600`}
-                    type="date"
-                    value={f.investDate ?? ''}
-                    onChange={(e) => uf(f.id, 'investDate', e.target.value)}
-                  />
-                </td>
-              ))}
-              {model.snapshots.length > founders.length &&
-                Array.from({ length: model.snapshots.length - founders.length }).map((_, i) => (
-                  <td key={`ef-${i}`} className={CELL} />
-                ))}
-            </tr>
+                {/* ── FOUNDER INVESTMENT ──────────────────────────────────── */}
+                <tr><td colSpan={numCols} className="h-2 bg-white p-0" /></tr>
+                <tr>
+                  <th className={HDR_LEFT}>Investimento Fondatori</th>
+                  {founders.map((f) => <th key={f.id} className={HDR}>{f.name}</th>)}
+                  {model.snapshots.length > founders.length &&
+                    Array.from({ length: model.snapshots.length - founders.length }).map((_, i) => (
+                      <th key={`ef-${i}`} className={HDR} />
+                    ))}
+                </tr>
+                <tr>
+                  <td className={CELL_LEFT_MUTED}>Importo (€)</td>
+                  {founders.map((f) => (
+                    <EurInput key={f.id} value={f.invested} onChange={(v) => uf(f.id, 'invested', v)} placeholder="€ 0" />
+                  ))}
+                  {model.snapshots.length > founders.length &&
+                    Array.from({ length: model.snapshots.length - founders.length }).map((_, i) => (
+                      <td key={`ef-${i}`} className={CELL} />
+                    ))}
+                </tr>
+                <tr>
+                  <td className={CELL_LEFT_MUTED}>Data</td>
+                  {founders.map((f) => (
+                    <td key={f.id} className={CELL_INPUT}>
+                      <input
+                        className={`${INPUT} text-blue-600`}
+                        type="date"
+                        value={f.investDate ?? ''}
+                        onChange={(e) => uf(f.id, 'investDate', e.target.value)}
+                      />
+                    </td>
+                  ))}
+                  {model.snapshots.length > founders.length &&
+                    Array.from({ length: model.snapshots.length - founders.length }).map((_, i) => (
+                      <td key={`ef-${i}`} className={CELL} />
+                    ))}
+                </tr>
+              </>
+            )}
 
           </tbody>
         </table>
@@ -621,8 +624,8 @@ export function EquityStory() {
       </div>
 
       {/* ── EXIT WATERFALL ────────────────────────────────────────────────── */}
-      <div className="overflow-hidden rounded-xl border border-gray-200">
-        <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 bg-gray-50 px-3 py-2">
+      <div className="overflow-x-auto rounded-xl border border-gray-200 w-fit max-w-full">
+        <div className="flex flex-wrap items-center gap-2 border-b border-gray-200 bg-gray-50 px-2 py-1.5">
           <span className="font-mono text-xs font-bold text-blue-600">EXIT</span>
           <div className="flex items-center gap-1.5">
             <span className="font-mono text-[10px] text-gray-400">Data:</span>
@@ -630,7 +633,7 @@ export function EquityStory() {
               type="date"
               value={exit.date}
               onChange={(e) => setExit((x) => ({ ...x, date: e.target.value }))}
-              className="w-32 border-none bg-transparent font-mono text-xs text-blue-600 outline-none"
+              className="w-28 border-none bg-transparent font-mono text-xs text-blue-600 outline-none"
             />
           </div>
           <ExitAmountInput value={exit.amount} onChange={(v) => setExit((x) => ({ ...x, amount: v }))} />

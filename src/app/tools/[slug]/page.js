@@ -56,7 +56,7 @@ export default async function ToolPage({ params }) {
         </div>
 
         {/* 2. Componente interattivo */}
-        <div className="mt-6 px-6 lg:px-8">
+        <div className="content mt-6">
           <ToolComponent />
         </div>
 
