@@ -248,6 +248,68 @@ export const getPage = cache(async (slug, preview = isDevelopment) => {
   }
 })
 
+export const getToolPage = cache(async (slug, preview = isDevelopment) => {
+  try {
+    const entry = await fetchGraphQL(
+      `query {
+        toolPageCollection(where: { slug: "${slug}" }, preview: ${preview}, limit: 1) {
+          items {
+            title
+            slug
+            description
+            howToUse {
+              json
+              links {
+                assets {
+                  block {
+                    sys {
+                      id
+                    }
+                    url(transform: {
+                      format: AVIF,
+                      quality: 50
+                    })
+                    title
+                    width
+                    height
+                    description
+                  }
+                }
+              }
+            }
+            faq {
+              json
+              links {
+                assets {
+                  block {
+                    sys {
+                      id
+                    }
+                    url(transform: {
+                      format: AVIF,
+                      quality: 50
+                    })
+                    title
+                    width
+                    height
+                    description
+                  }
+                }
+              }
+            }
+          }
+        }
+      }`,
+      preview
+    )
+
+    return entry?.data?.toolPageCollection?.items?.[0] ?? null
+  } catch (error) {
+    console.info(error)
+    return null
+  }
+})
+
 export const getAllLogbook = cache(async (preview = isDevelopment) => {
   try {
     const entries = await fetchGraphQL(

@@ -7,7 +7,7 @@ import {
   NavigationIcon,
   PencilLineIcon,
   SparklesIcon,
-  Wand2Icon,
+  WrenchIcon,
   YoutubeIcon
 } from 'lucide-react'
 
@@ -122,9 +122,9 @@ export const LINKS = [
     icon: <NavigationIcon size={16} />
   },
   {
-    href: '/stack',
-    label: 'Stack',
-    icon: <Wand2Icon size={16} />
+    href: '/tools',
+    label: 'Tool Utili',
+    icon: <WrenchIcon size={16} />
   },
   {
     href: '/workspace',
