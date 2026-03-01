@@ -4,7 +4,10 @@ import { notFound } from 'next/navigation'
 import { RichText } from '@/components/contentful/rich-text'
 import { FloatingHeader } from '@/components/floating-header'
 import { ScrollArea } from '@/components/scroll-area'
+import { DefaultAnalysis } from '@/components/tools/default-analysis'
 import { EquityStory } from '@/components/tools/equity-story'
+import { LtvCalculator } from '@/components/tools/ltv-calculator'
+import { StockOptionCalculator } from '@/components/tools/stock-option-calculator'
 import { getToolPage } from '@/lib/contentful'
 import { TOOLS } from '@/lib/tools'
 import { isDevelopment } from '@/lib/utils'
@@ -25,6 +28,9 @@ export async function generateMetadata({ params }) {
 }
 
 const TOOL_COMPONENTS = {
+  'ltv-calculator': LtvCalculator,
+  'stock-option-calculator': StockOptionCalculator,
+  'default-analysis': DefaultAnalysis,
   'equity-story': EquityStory
 }
 
