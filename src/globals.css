@@ -25,6 +25,11 @@
   --breakpoint-xl: 1280px;
 
   --animate-reveal: reveal 0.7s ease-in-out;
+
+  /* shadcn chart compatibility */
+  --color-muted: var(--color-gray-100);
+  --color-muted-foreground: var(--color-gray-500);
+  --color-border: var(--color-gray-200);
 }
 
 /*
