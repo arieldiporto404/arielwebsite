@@ -266,33 +266,60 @@ export default function WealthPage() {
 
   const currentWealth = chartData.length > 0 ? chartData[chartData.length - 1]?.total : 0
 
+  const tableData = [...displayChart].reverse().map(row => {
+    const aRow = displayAssets.find(r => r.rawMonth === row.rawMonth) || {}
+    const lRow = displayLiabilities.find(r => r.rawMonth === row.rawMonth) || {}
+    const assets      = assetTagMeta.reduce((s, t) => s + (aRow[t.key] || 0), 0)
+    const liabilities = liabilityTagMeta.reduce((s, t) => s + (lRow[t.key] || 0), 0)
+    return { month: row.month, assets, liabilities, netWorth: row.total }
+  })
+
   function StackedChart({ data, tagMeta, title }) {
+    const [pct, setPct] = useState(false)
     if (!data.length || !tagMeta.length) return null
     const config = Object.fromEntries(tagMeta.map(({ key, label, color }) => [key, { label, color }]))
     const interval = Math.max(0, Math.floor(data.length / 12) - 1)
-    const barCategoryGap = data.length <= 6 ? '40%' : data.length <= 15 ? '20%' : '6%'
+
+    // Dati normalizzati a 100% per ogni riga
+    const absData = data
+    const pctData = data.map(row => {
+      const total = tagMeta.reduce((s, t) => s + (row[t.key] || 0), 0)
+      if (!total) return row
+      const out = { month: row.month, rawMonth: row.rawMonth }
+      for (const { key } of tagMeta) out[key] = ((row[key] || 0) / total) * 100
+      return out
+    })
+    const chartRows = pct ? pctData : absData
+
     const CustomTooltip = ({ active, payload, label: lbl }) => {
       if (!active || !payload?.length) return null
       const items = payload.filter(p => p.value)
+      // Trova la riga originale per i valori assoluti
+      const origRow = absData.find(r => r.month === lbl) || {}
+      const absTotal = tagMeta.reduce((s, t) => s + (origRow[t.key] || 0), 0)
       return (
         <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-md" style={{ fontSize: 12 }}>
           <p className="mb-2 font-semibold text-gray-900">{lbl}</p>
           {items.map((item) => {
             const meta = tagMeta.find(t => t.key === item.dataKey)
+            const absVal = origRow[item.dataKey] || 0
+            const pctVal = absTotal > 0 ? (absVal / absTotal) * 100 : 0
             return (
               <div key={item.dataKey} className="flex items-center justify-between gap-6 mb-1">
                 <div className="flex items-center gap-1.5">
                   <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: meta?.color || item.fill }} />
                   <span className="text-gray-600">{meta?.label ?? item.dataKey}</span>
                 </div>
-                <span className="font-mono font-medium text-gray-900">{formatEur(item.value)}</span>
+                <span className="font-mono font-medium text-gray-900">
+                  {formatEur(absVal)}<span className="ml-1.5 text-gray-400">{pctVal.toFixed(1)}%</span>
+                </span>
               </div>
             )
           })}
           {items.length > 1 && (
             <div className="flex items-center justify-between gap-6 mt-2 border-t border-gray-100 pt-2">
               <span className="font-semibold text-gray-700">Totale</span>
-              <span className="font-mono font-semibold text-gray-900">{formatEur(items.reduce((s, p) => s + p.value, 0))}</span>
+              <span className="font-mono font-semibold text-gray-900">{formatEur(absTotal)}</span>
             </div>
           )}
         </div>
@@ -300,17 +327,30 @@ export default function WealthPage() {
     }
     return (
       <div className="mb-6 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-        <h3 className="mb-4 font-semibold tracking-tight text-gray-900">{title}</h3>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="font-semibold tracking-tight text-gray-900">{title}</h3>
+          <div className="flex overflow-hidden rounded-md border border-gray-200 text-xs font-medium">
+            <button onClick={() => setPct(false)}
+              className={`px-2.5 py-1 ${!pct ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
+              €
+            </button>
+            <button onClick={() => setPct(true)}
+              className={`px-2.5 py-1 border-l border-gray-200 ${pct ? 'bg-gray-900 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
+              %
+            </button>
+          </div>
+        </div>
         <ChartContainer config={config} className="h-72 w-full">
-          <BarChart data={data} barCategoryGap={barCategoryGap} barGap={0} margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
+          <BarChart data={chartRows} barCategoryGap="8%" barGap={0} margin={{ top: 8, right: 16, left: 8, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
             <XAxis dataKey="month" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} interval={interval} />
             <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} width={45}
-              tickFormatter={(v) => Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(0)}k` : v.toFixed(0)} />
+              domain={pct ? [0, 100] : undefined}
+              tickFormatter={(v) => pct ? `${v.toFixed(0)}%` : Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(0)}k` : v.toFixed(0)} />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f3f4f6' }} />
             <ChartLegend content={<ChartLegendContent />} />
             {tagMeta.map(({ key }, i) => (
-              <Bar key={key} dataKey={key} stackId="s" fill={`var(--color-${key})`} maxBarSize={32}
+              <Bar key={key} dataKey={key} stackId="s" fill={`var(--color-${key})`}
                 radius={i === tagMeta.length - 1 ? [3, 3, 0, 0] : [0, 0, 0, 0]} />
             ))}
           </BarChart>
@@ -392,7 +432,7 @@ export default function WealthPage() {
           <h3 className="mb-4 font-semibold tracking-tight text-gray-900">Evoluzione patrimonio netto</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={displayChart} margin={{ top: 8, right: 16, left: 8, bottom: 0 }} barCategoryGap="20%">
+              <BarChart data={displayChart} margin={{ top: 8, right: 16, left: 8, bottom: 0 }} barCategoryGap="8%">
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
                 <XAxis
                   dataKey="month"
@@ -417,7 +457,7 @@ export default function WealthPage() {
                   contentStyle={{ fontSize: 12, border: '1px solid #e5e7eb', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
                   cursor={{ fill: '#f3f4f6' }}
                 />
-                <Bar dataKey="total" radius={[3, 3, 0, 0]} maxBarSize={32}>
+                <Bar dataKey="total" radius={[3, 3, 0, 0]}>
                   {displayChart.map((entry, i) => (
                     <Cell
                       key={i}
@@ -437,6 +477,39 @@ export default function WealthPage() {
 
       {/* Stacked liability chart */}
       {!loading && <StackedChart data={displayLiabilities} tagMeta={liabilityTagMeta} title="Composizione debiti per categoria" />}
+
+      {/* Tabella riepilogo */}
+      {tableData.length > 0 && (
+        <div className="mb-6 rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="border-b border-gray-100 px-4 py-3">
+            <h3 className="font-semibold tracking-tight text-gray-900">Riepilogo per periodo</h3>
+          </div>
+          <div className="overflow-x-auto max-h-80 overflow-y-auto">
+            <table className="w-full text-sm">
+              <thead className="sticky top-0 bg-gray-50 border-b border-gray-100">
+                <tr>
+                  <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-widest text-gray-400">Periodo</th>
+                  <th className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-widest text-gray-400">Attivi</th>
+                  <th className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-widest text-gray-400">Debiti</th>
+                  <th className="px-4 py-2.5 text-right text-xs font-semibold uppercase tracking-widest text-gray-400">Patrimonio netto</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {tableData.map((row, i) => (
+                  <tr key={i} className={i === 0 ? 'bg-blue-50/40' : 'hover:bg-gray-50'}>
+                    <td className="px-4 py-2.5 font-medium text-gray-700">{row.month}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-gray-700">{formatEur(row.assets)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-red-600">{row.liabilities > 0 ? `- ${formatEur(row.liabilities)}` : '—'}</td>
+                    <td className={`px-4 py-2.5 text-right font-mono font-semibold ${row.netWorth >= 0 ? 'text-gray-900' : 'text-red-600'}`}>
+                      {formatEur(row.netWorth)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Saldi storici */}
       {years.length > 0 && (
