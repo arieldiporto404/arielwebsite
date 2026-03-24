@@ -1,6 +1,23 @@
 'use client'
 import supabase from './supabase'
 
+// Supabase ha max_rows=1000 per default — questa funzione recupera TUTTE
+// le transazioni con paginazione per bypassare quel limite
+async function fetchAllTransactions(query) {
+  const batchSize = 1000
+  let all = []
+  let from = 0
+  while (true) {
+    const { data, error } = await query(from, from + batchSize - 1)
+    if (error) throw error
+    if (!data || data.length === 0) break
+    all = all.concat(data)
+    if (data.length < batchSize) break
+    from += batchSize
+  }
+  return all
+}
+
 // ============================================================
 // ACCOUNTS
 // ============================================================
@@ -14,25 +31,57 @@ export async function getAccounts() {
   return data
 }
 
-export async function createAccount({ name, initial_balance }) {
+export async function createAccount({ name, initial_balance, account_type = 'asset', tags = [] }) {
   const { data, error } = await supabase
     .from('pf_accounts')
-    .insert({ name, initial_balance })
+    .insert({ name, initial_balance, account_type, tags })
     .select()
     .single()
   if (error) throw error
   return data
 }
 
-export async function updateAccount(id, { name, initial_balance }) {
+export async function updateAccount(id, { name, initial_balance, account_type, tags }) {
   const { data, error } = await supabase
     .from('pf_accounts')
-    .update({ name, initial_balance })
+    .update({ name, initial_balance, account_type, tags })
     .eq('id', id)
     .select()
     .single()
   if (error) throw error
   return data
+}
+
+// Saldo di tutti i conti ad una data specifica
+export async function getAccountsWithBalanceAtDate(targetDate) {
+  const accounts = await getAccounts()
+
+  const txs = await fetchAllTransactions((from, to) =>
+    supabase
+      .from('pf_transactions')
+      .select('type, amount, account_id, from_account_id, to_account_id')
+      .lte('date', targetDate)
+      .order('created_at', { ascending: true })
+      .range(from, to)
+  )
+
+  const delta = {}
+  for (const t of txs) {
+    const amt = Number(t.amount)
+    if (t.type === 'income' && t.account_id) {
+      delta[t.account_id] = (delta[t.account_id] || 0) + amt
+    } else if (t.type === 'expense' && t.account_id) {
+      delta[t.account_id] = (delta[t.account_id] || 0) - amt
+    } else if (t.type === 'transfer') {
+      if (t.from_account_id) delta[t.from_account_id] = (delta[t.from_account_id] || 0) - amt
+      if (t.to_account_id)   delta[t.to_account_id]   = (delta[t.to_account_id]   || 0) + amt
+    }
+  }
+
+  return accounts.map((acc) => ({
+    ...acc,
+    balance: Number(acc.initial_balance) + (delta[acc.id] || 0)
+  }))
 }
 
 export async function deleteAccount(id) {
@@ -44,51 +93,30 @@ export async function deleteAccount(id) {
 export async function getAccountsWithBalance() {
   const accounts = await getAccounts()
 
-  // Aggregate entrate per conto
-  const { data: incomes } = await supabase
-    .from('pf_transactions')
-    .select('account_id, amount')
-    .eq('type', 'income')
+  const txs = await fetchAllTransactions((from, to) =>
+    supabase
+      .from('pf_transactions')
+      .select('type, amount, account_id, from_account_id, to_account_id')
+      .order('created_at', { ascending: true })
+      .range(from, to)
+  )
 
-  // Aggregate uscite per conto
-  const { data: expenses } = await supabase
-    .from('pf_transactions')
-    .select('account_id, amount')
-    .eq('type', 'expense')
-
-  // Trasferimenti in entrata
-  const { data: transfersIn } = await supabase
-    .from('pf_transactions')
-    .select('to_account_id, amount')
-    .eq('type', 'transfer')
-
-  // Trasferimenti in uscita
-  const { data: transfersOut } = await supabase
-    .from('pf_transactions')
-    .select('from_account_id, amount')
-    .eq('type', 'transfer')
-
-  const sumMap = (arr, key) => {
-    const m = {}
-    for (const r of arr || []) {
-      m[r[key]] = (m[r[key]] || 0) + Number(r.amount)
+  const delta = {}
+  for (const t of txs) {
+    const amt = Number(t.amount)
+    if (t.type === 'income' && t.account_id) {
+      delta[t.account_id] = (delta[t.account_id] || 0) + amt
+    } else if (t.type === 'expense' && t.account_id) {
+      delta[t.account_id] = (delta[t.account_id] || 0) - amt
+    } else if (t.type === 'transfer') {
+      if (t.from_account_id) delta[t.from_account_id] = (delta[t.from_account_id] || 0) - amt
+      if (t.to_account_id)   delta[t.to_account_id]   = (delta[t.to_account_id]   || 0) + amt
     }
-    return m
   }
-
-  const incomeMap = sumMap(incomes, 'account_id')
-  const expenseMap = sumMap(expenses, 'account_id')
-  const transferInMap = sumMap(transfersIn, 'to_account_id')
-  const transferOutMap = sumMap(transfersOut, 'from_account_id')
 
   return accounts.map((acc) => ({
     ...acc,
-    current_balance:
-      Number(acc.initial_balance) +
-      (incomeMap[acc.id] || 0) -
-      (expenseMap[acc.id] || 0) +
-      (transferInMap[acc.id] || 0) -
-      (transferOutMap[acc.id] || 0)
+    current_balance: Number(acc.initial_balance) + (delta[acc.id] || 0)
   }))
 }
 
@@ -271,27 +299,30 @@ export async function resetAllTransactions() {
 
 // Entrate e uscite mensili (ultimi N mesi)
 export async function getMonthlyTotals(dateFrom, dateTo) {
-  const { data, error } = await supabase
-    .from('pf_transactions')
-    .select('date, type, amount')
-    .in('type', ['income', 'expense'])
-    .gte('date', dateFrom)
-    .lte('date', dateTo)
-    .limit(10000)
-  if (error) throw error
-  return data
+  return fetchAllTransactions((from, to) =>
+    supabase
+      .from('pf_transactions')
+      .select('date, type, amount')
+      .in('type', ['income', 'expense'])
+      .gte('date', dateFrom)
+      .lte('date', dateTo)
+      .order('created_at', { ascending: true })
+      .range(from, to)
+  )
 }
 
 // KPI totals per periodo
 export async function getKpiTotals(dateFrom, dateTo) {
-  const { data, error } = await supabase
-    .from('pf_transactions')
-    .select('type, amount')
-    .in('type', ['income', 'expense'])
-    .gte('date', dateFrom)
-    .lte('date', dateTo)
-    .limit(10000)
-  if (error) throw error
+  const data = await fetchAllTransactions((from, to) =>
+    supabase
+      .from('pf_transactions')
+      .select('type, amount')
+      .in('type', ['income', 'expense'])
+      .gte('date', dateFrom)
+      .lte('date', dateTo)
+      .order('created_at', { ascending: true })
+      .range(from, to)
+  )
 
   let totalIncome = 0
   let totalExpense = 0
@@ -310,14 +341,16 @@ export async function getTotalWealth() {
 
 // Breakdown spese per categoria nel periodo
 export async function getExpensesByCategory(dateFrom, dateTo) {
-  const { data, error } = await supabase
-    .from('pf_transactions')
-    .select('amount, category_id, pf_categories(id, name)')
-    .eq('type', 'expense')
-    .gte('date', dateFrom)
-    .lte('date', dateTo)
-    .limit(10000)
-  if (error) throw error
+  const data = await fetchAllTransactions((from, to) =>
+    supabase
+      .from('pf_transactions')
+      .select('amount, category_id, pf_categories(id, name)')
+      .eq('type', 'expense')
+      .gte('date', dateFrom)
+      .lte('date', dateTo)
+      .order('created_at', { ascending: true })
+      .range(from, to)
+  )
 
   const map = {}
   for (const r of data) {
@@ -331,15 +364,16 @@ export async function getExpensesByCategory(dateFrom, dateTo) {
 
 // Tabella pivot: per categoria × mese
 export async function getPivotData(type, dateFrom, dateTo) {
-  const { data, error } = await supabase
-    .from('pf_transactions')
-    .select('date, amount, category_id, subcategory_id, pf_categories(id, name), pf_subcategories(id, name)')
-    .eq('type', type)
-    .gte('date', dateFrom)
-    .lte('date', dateTo)
-    .limit(10000)
-  if (error) throw error
-  return data
+  return fetchAllTransactions((from, to) =>
+    supabase
+      .from('pf_transactions')
+      .select('date, amount, category_id, subcategory_id, pf_categories(id, name), pf_subcategories(id, name)')
+      .eq('type', type)
+      .gte('date', dateFrom)
+      .lte('date', dateTo)
+      .order('created_at', { ascending: true })
+      .range(from, to)
+  )
 }
 
 // Dati mensili per una categoria specifica (rolling analysis)
@@ -384,14 +418,26 @@ export async function deleteHistoricalBalance(id) {
   if (error) throw error
 }
 
-// Patrimonio mensile dal 2023 in poi (calcolato da transazioni)
-export async function getWealthByMonth() {
-  const accounts = await getAccountsWithBalance()
-  const { data: txAll, error } = await supabase
+// Tutte le transazioni con campi necessari per calcolo saldi per conto
+export async function getAllTransactionsForAccounts() {
+  const { data, error } = await supabase
     .from('pf_transactions')
     .select('date, type, amount, account_id, from_account_id, to_account_id')
-    .gte('date', '2023-01-01')
     .order('date', { ascending: true })
+    .limit(10000)
   if (error) throw error
-  return { accounts, transactions: txAll }
+  return data
+}
+
+// Patrimonio mensile (calcolato da tutte le transazioni con paginazione)
+export async function getWealthByMonth() {
+  const accounts = await getAccounts()
+  const transactions = await fetchAllTransactions((from, to) =>
+    supabase
+      .from('pf_transactions')
+      .select('date, type, amount, account_id, from_account_id, to_account_id')
+      .order('date', { ascending: true })
+      .range(from, to)
+  )
+  return { accounts, transactions }
 }

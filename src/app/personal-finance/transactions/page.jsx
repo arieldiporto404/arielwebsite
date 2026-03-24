@@ -1,5 +1,5 @@
-import TransactionsPage from '@/components/personal-finance/transactions-page'
+import TransactionsView from '@/components/personal-finance/transactions-view'
 
 export default function Transactions() {
-  return <TransactionsPage />
+  return <TransactionsView />
 }

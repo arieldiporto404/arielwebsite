@@ -8,11 +8,18 @@
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS pf_accounts (
-  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name          text NOT NULL,
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name            text NOT NULL,
   initial_balance numeric(12,2) NOT NULL DEFAULT 0,
-  created_at    timestamptz DEFAULT now()
+  account_type    text NOT NULL DEFAULT 'asset' CHECK (account_type IN ('asset', 'liability')),
+  tags            text[] NOT NULL DEFAULT '{}',
+  created_at      timestamptz DEFAULT now()
 );
+
+-- Migration (se la tabella esiste già):
+-- ALTER TABLE pf_accounts
+--   ADD COLUMN IF NOT EXISTS account_type text NOT NULL DEFAULT 'asset' CHECK (account_type IN ('asset', 'liability')),
+--   ADD COLUMN IF NOT EXISTS tags text[] NOT NULL DEFAULT '{}';
 
 CREATE TABLE IF NOT EXISTS pf_categories (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),

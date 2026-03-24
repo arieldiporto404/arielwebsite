@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+/* Dark mode class-based: le classi dark: si attivano solo con .dark sull'elemento,
+   non dal sistema operativo. Il sito è sempre light. */
+@variant dark (&:is(.dark *));
+
 @plugin '@tailwindcss/container-queries';
 @plugin 'tailwindcss-animate';
 
